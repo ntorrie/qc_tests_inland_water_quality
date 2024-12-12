@@ -79,14 +79,19 @@ depl_range2 <- unique(dat_raw$deployment_range)[1]
 
 human_in_loop <- read_excel("R:/tracking_sheets/2024-10-17_inland_water_quality_human_in_loop_tracking.xlsx", 
   na = c("NA", "")) %>%
-  filter(station == station2) 
-
-# %>%
-#   filter(depl_range == depl_range2)
+  filter(station == station2) %>%
+  filter(depl_range == depl_range2)
 
 
 human_in_loop$depl_range[1]
-depl_range
+depl_range2
+
+
+
+
+
+
+
 
 vars <- dat_raw %>% 
   ss_pivot_longer() %>% 
