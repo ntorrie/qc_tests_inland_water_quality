@@ -49,17 +49,17 @@ dt_options2 <- list(
       buttons = c('copy', 'csv')
 )
 
-# county <- params$county
-# depl_file <- params$depl_file
+county <- params$county
+depl_file <- params$depl_file
 
-county <- "guysborough"
-path <- file.path("R:/data_branches/inland_water_quality/processed_data/deployment_data")
-depls <- list.files(
-  paste(path, county, "new", sep = "/"),
-  pattern = ".rds",
-  full.names = TRUE
-)
-depl_file <- depls[1]
+# county <- "Queens"
+# path <- file.path("R:/data_branches/inland_water_quality/processed_data/deployment_data")
+# depls <- list.files(
+#   paste(path, county, "new", sep = "/"),
+#   pattern = ".rds",
+#   full.names = TRUE
+# )
+# depl_file <- depls[1]
 
 path_out <- file.path("R:/data_branches/inland_water_quality/processed_data")
 
@@ -74,24 +74,12 @@ file_name <- sub(".*/", "", depl_file, perl = TRUE)
 
 dat_raw <- readRDS(depl_file)
 
-station2 <- unique(dat_raw$station)
-depl_range2 <- unique(dat_raw$deployment_range)[1]
+station <- unique(dat_raw$station)
+depl_range <- unique(dat_raw$deployment_range)[1]
 
 human_in_loop <- read_excel("R:/tracking_sheets/2024-10-17_inland_water_quality_human_in_loop_tracking.xlsx", 
   na = c("NA", "")) %>%
-  filter(station == station2) %>%
-  filter(depl_range == depl_range2)
-
-
-human_in_loop$depl_range[1]
-depl_range2
-
-
-
-
-
-
-
+  filter(station == !!station, depl_range == !!depl_range)
 
 vars <- dat_raw %>% 
   ss_pivot_longer() %>% 
@@ -128,8 +116,12 @@ if (station %in% atypical_stations) {
 
 # assign flags - qc tests
 dat <- dat_raw %>% 
-  qc_test_all(qc_tests = qc_tests, join_column_spike = join_column_spike) %>% 
-  qc_test_human_in_loop(human_in_loop_table = human_in_loop)
+  qc_test_all(qc_tests = qc_tests, join_column_spike = join_column_spike)%>% 
+  qc_test_human_in_loop(human_in_loop_table = human_in_loop, qc_tests = qc_tests)
+# 
+# dat_hil <- dat_raw %>% 
+#   qc_test_all(qc_tests = qc_tests, join_column_spike = join_column_spike)%>% 
+#   qc_test_human_in_loop(human_in_loop_table = human_in_loop, qc_tests = qc_tests)
 
 if(any(str_detect(colnames(dat), "human_in_loop"))) {
   qc_tests <- c(qc_tests, "human_in_loop")
