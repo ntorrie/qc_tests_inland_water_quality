@@ -9,38 +9,38 @@ library(sensorstrings)
 
 county <- "queens"
 
-path <- file.path("R:/data_branches/water_quality/processed_data/qc_data")
+path <- file.path("R:/data_branches/inland_water_quality/processed_data/qc_data")
 
 dat <- qc_assemble_county_data(folder = county) %>%
-  mutate(
-    lease = if_else(lease == "NA" | lease == "na", NA_character_, lease),
-    lease = case_when(
-      lease == "772" ~ "0772",
-      lease == "193" ~ "0193",
-      lease == "667" ~ "0667",
-      lease == "716" ~ "0716",
-      lease == "692" ~ "0692",
-
-      #lunenburg
-      lease == "995" ~ "0995",
-
-      # guys
-      lease == "1" ~ "0001",
-      lease == "28" ~ "0028",
-      lease == "75" ~ "0075",
-      lease == "191" ~ "0191",
-      lease == "613" ~ "0613",
-      lease == "622" ~ "0622",
-      lease == "623" ~ "0623",
-      lease == "839" ~ "0839",
-      lease == "904" ~ "0904",
-
-      # shelburne
-      lease == "967" ~ "0967",
-
-      TRUE ~ lease
-    )
-  )
+  # mutate(
+  #   lease = if_else(lease == "NA" | lease == "na", NA_character_, lease),
+  #   lease = case_when(
+  #     lease == "772" ~ "0772",
+  #     lease == "193" ~ "0193",
+  #     lease == "667" ~ "0667",
+  #     lease == "716" ~ "0716",
+  #     lease == "692" ~ "0692",
+  # 
+  #     #lunenburg
+  #     lease == "995" ~ "0995",
+  # 
+  #     # guys
+  #     lease == "1" ~ "0001",
+  #     lease == "28" ~ "0028",
+  #     lease == "75" ~ "0075",
+  #     lease == "191" ~ "0191",
+  #     lease == "613" ~ "0613",
+  #     lease == "622" ~ "0622",
+  #     lease == "623" ~ "0623",
+  #     lease == "839" ~ "0839",
+  #     lease == "904" ~ "0904",
+  # 
+  #     # shelburne
+  #     lease == "967" ~ "0967",
+  # 
+  #     TRUE ~ lease
+  #   )
+  # )
 
 unique(dat$waterbody)
 unique(dat$station)

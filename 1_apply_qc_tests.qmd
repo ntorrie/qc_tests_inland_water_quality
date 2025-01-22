@@ -52,7 +52,7 @@ dt_options2 <- list(
 county <- params$county
 depl_file <- params$depl_file
 
-# county <- "Queens"
+# county <- "Digby"
 # path <- file.path("R:/data_branches/inland_water_quality/processed_data/deployment_data")
 # depls <- list.files(
 #   paste(path, county, "new", sep = "/"),
