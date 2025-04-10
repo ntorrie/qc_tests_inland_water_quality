@@ -1,0 +1,185 @@
+---
+title: "Inland Data - Visualize Flagged Datasets"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    embed-resources: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r, set-up, include=FALSE, echo = FALSE}
+library(here)
+library(quarto)
+library(rmarkdown)
+library(sensorstrings)
+library(qaqcmar)
+library(purrr)
+library(dplyr)
+library(DT)
+library(leaflet)
+
+dt_options <- list(
+  dom = 'ft',
+  paging = FALSE,
+  searching = TRUE,
+  scrollY = "500px",
+  scrollX = "500px",
+  columnDefs = list(list(className = 'dt-center', targets = "_all"))
+)
+```
+
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| include: false
+
+#Load CMAR river data
+
+rdslist <- list.files("R:/data_branches/inland_water_quality/processed_data/qc_data", pattern = ".rds", full.names = TRUE, recursive = TRUE)
+
+dat_all <- rdslist %>%
+  purrr::map_dfr(readRDS)
+
+dat_long <- qc_pivot_longer(dat_all, qc_tests = c("grossrange", "rolling_sd", "hil"))
+
+dat_clean_long <- dat_long %>% filter(qc_flag_temperature_degree_c < 4)
+
+dat_clean_wide <- qc_pivot_wider(dat_clean_long)
+
+st_locations <- dat_all %>%
+  distinct(latitude, .keep_all = TRUE)
+
+list <- unique(dat_all$station)
+
+```
+
+## Summary
+
+CMAR has collected water quality data in several inland waterbodies in Nova Scotia. CMAR intends to publish all inland data under a new "Inland" branch of the [Coastal Monitoring Program](https://cmar.ca/coastal-monitoring-program/#station). Data has been processed in a similar manner to the coastal water quality data, and data flags applied using the [qaqcmar](https://github.com/dempsey-CMAR/qaqcmar) package. 
+
+Sensors on some rivers may have experienced air exposure throughout their deployment due to fluctuations in water levels. Data observations during these suspected periods of exposure have been assigned a flag of 4 (fail). Note, some sensors may be deployed in tributaries of the named deployment waterbody. Take note of exact station coordinates prior to conducting analysis.
+
+## Station Locations
+
+Approximate location of stations included in analysis.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-height: 6
+# interactive map
+leaflet(st_locations) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(
+    data = st_locations,
+    lng = ~longitude, lat = ~latitude, label = ~station,
+    weight = 1,
+    color = "black",
+    fillOpacity = 0.75,
+    radius = 5
+  ) %>% 
+  addScaleBar(
+    position = "bottomleft", 
+    options = scaleBarOptions(imperial = FALSE)
+  ) %>%
+  addProviderTiles("Esri.WorldTopoMap")
+  #addProviderTiles(providers$CartoDB.Positron)
+
+```
+
+## Summary Table
+
+Summary statistics derived from cleaned datasets. Any observations with flags of 4 (failed one or more quality control tests) were removed.
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-height: 5
+#| results: asis
+
+  stats <- dat_clean_long %>%
+    group_by(station, variable) %>%
+    summarise(
+      n = n(),
+      mean = round(mean(value), digits = 2),
+      min = min(value),
+      max = max(value),
+    ) %>%
+    ungroup() %>%
+    select(station, variable, n, everything())
+  
+  
+  stats %>%
+    datatable(rownames = FALSE, options = dt_options)
+```
+
+
+## QC Figures
+Datasets plotted with qc flag summary results.
+
+::: panel-tabset
+```{r} 
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-height: 5
+#| results: asis
+
+for (i in list) {
+  
+  dat_i <- dat_all %>%
+    filter(station == i)
+  
+  cat(paste("### ", i, "\n \n"))
+  
+  p <- qc_plot_flags(dat_i, qc_tests = c("qc"), flag_title = FALSE)
+
+  print(p$temperature_degree_c$qc)
+  
+  
+  cat("\n\n")
+  
+}
+
+```
+:::
+
+
+## Clean Figures
+Datasets plotted with qc flags of 4 removed.
+
+::: panel-tabset
+```{r} 
+#| warning: false
+#| message: false
+#| echo: false
+#| fig-height: 5
+#| results: asis
+
+for (i in list) {
+  
+  dat_i <- dat_clean_wide %>%
+    filter(station == i)
+  
+  cat(paste("### ", i, "\n \n"))
+  
+  p <- qc_plot_flags(dat_i, qc_tests = c("qc"), flag_title = FALSE)
+
+  print(p$temperature_degree_c$qc)
+  
+  
+  cat("\n\n")
+  
+}
+
+```
+:::
+
+
