@@ -101,7 +101,7 @@ if("sensor_depth_measured_m" %in% vars) {
 }
 
 # do not apply user grossrange test for certain stations
-atypical_stations <- c("Hourglass Lake", "Sissiboo", "Piper Lake", "Mersey River 3")
+atypical_stations <- c("Hourglass Lake", "Sissiboo River", "Piper Lake", "Mersey River 3")
 
 if (station %in% atypical_stations) {
   thresholds <-

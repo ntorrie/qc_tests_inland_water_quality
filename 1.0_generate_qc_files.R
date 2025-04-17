@@ -7,7 +7,7 @@ library(sensorstrings)
 #Re-run stations which require HIL flags separately. TODO: fix this issue
 path <- file.path("R:/data_branches/inland_water_quality/processed_data/deployment_data")
 
-county <- "Digby"
+county <- "Yarmouth"
 
 depls <- list.files(
   paste(path, county, "new", sep = "/"),
@@ -17,14 +17,14 @@ depls <- list.files(
 depls
 
 #set depls to one file in list if you only want to run script for one station
-depls <- depls[7]
+depls <- depls[3]
 depls
 
 # export html file for each county showing the flagged observations
 sapply(depls, function(x) {
 
   quarto_render(
-    input = here("1_apply_qc_tests.qmd"),
+    input = here("1.1_apply_qc_tests.qmd"),
     output_file = paste0(
       sub(".rds", "", sub(".*/", "", x, perl = TRUE)),
       ".html"
@@ -32,6 +32,9 @@ sapply(depls, function(x) {
     execute_params = list(county = county, depl_file = x))
 
 })
+
+#2024-08-21 11:44:18
+#2024-08-25 04:44:18
 
 # extra code
 
